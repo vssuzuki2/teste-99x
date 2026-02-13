@@ -1,5 +1,5 @@
 services:
-  # container ubuntu com php
+  # Ubuntu Container Running PHP
   php82:
     image: php82
     container_name: php82
@@ -14,7 +14,7 @@ services:
       dockerfile: Dockerfile
       args:
         - BUILDKIT_INLINE_CACHE=1
-#conteiner proxy nginx isolando api para rede interna
+#Nginx container isolating apis and other services to internal network
   nginx-proxy:
     image: nginx
     container_name: nginx-proxy
@@ -42,7 +42,7 @@ services:
     volumes:
       - ./docker/mysql/data:/var/lib/mysql
 
-  # mailhog container para testes de envio e recebimento de email
+  # mailhog container to simulate emails recieving and sending
   mailhog:
     image: mailhog/mailhog
     container_name: mailhog
@@ -61,7 +61,7 @@ services:
     networks:
       - api-network
 
-  # localstack container para simular servicos aws local
+  # localstack container to simulate AWS services such as SQS and Lambda funcions 
   # localstack:
   #   container_name: "localstack_main"
   #   image: localstack/localstack
