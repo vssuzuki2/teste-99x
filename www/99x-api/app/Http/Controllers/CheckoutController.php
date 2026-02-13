@@ -1,8 +1,10 @@
 <?php
 namespace App\Http\Controllers;
+
 use App\Contracts\PaymentGateway;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+
 class CheckoutController extends Controller
 {
     public function __construct(private PaymentGateway $payments) {}
