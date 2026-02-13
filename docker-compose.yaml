@@ -1,0 +1,94 @@
+services:
+  # container ubuntu com php
+  php82:
+    image: php82
+    container_name: php82
+    networks:
+      - api-network
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./www/99x-api:/var/www/html/99x-api
+    build:
+      context: .docker
+      dockerfile: Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+#conteiner proxy nginx isolando api para rede interna
+  nginx-proxy:
+    image: nginx
+    container_name: nginx-proxy
+    networks:
+      - api-network
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - php82
+
+  # mysql container
+  mysql8:
+    image: mysql:8.0
+    command: mysqld --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --skip-host-cache --skip-name-resolve
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: 99x
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    ports:
+      - "3310:3306"
+    networks:
+      - api-network
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+
+  # mailhog container para testes de envio e recebimento de email
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - api-network
+
+  # redis container
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - api-network
+
+  # localstack container para simular servicos aws local
+  # localstack:
+  #   container_name: "localstack_main"
+  #   image: localstack/localstack
+  #   networks:
+  #     - api-network
+  #   ports:
+  #     - "127.0.0.1:4566:4566"
+  #     - "127.0.0.1:4510-4559:4510-4559"
+  #     - "127.0.0.1:53:53"
+  #     - "127.0.0.1:53:53/udp"
+  #     - "127.0.0.1:443:443"
+  #   environment:
+  #     - DEBUG=1
+  #     - PERSISTENCE=1
+  #     - LAMBDA_EXECUTOR=docker-reuse
+  #     - LOCALSTACK_API_KEY=your-api-key
+  #     - LOCALSTACK_HOST=localstack
+  #     - DOCKER_HOST=unix:///var/run/docker.sock
+  #     - SQS_ENDPOINT_STRATEGY=off
+  #   volumes:
+  #     - "./volume:/var/lib/localstack"
+  #     - "/var/run/docker.sock:/var/run/docker.sock"
+
+networks:
+  api-network:
+    driver: bridge
+
+volumes:
+  minio_data:
+    driver: local
